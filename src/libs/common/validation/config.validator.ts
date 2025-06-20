@@ -1,12 +1,14 @@
 import { z } from "zod"
 
-const configSchema = z.object({
+export const configSchema = z.object({
 	NODE_ENV: z.enum(["development", "production"]).default("development"),
 	APPLICATION_PORT: z.coerce.number().min(1).max(65535).default(3000),
 	APPLICATION_URL: z.string().url(),
 	ALLOWED_ORIGIN: z.string().url(),
 	POSTGRES_URI: z.string().url(),
-	REDIS_URI: z.string().url()
+	REDIS_URI: z.string().url(),
+
+	COOKIES_SECRET: z.string().min(1)
 })
 
 export function validateConfig(config: Record<string, unknown>) {
