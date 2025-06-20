@@ -10,17 +10,21 @@ const configSchema = z.object({
 })
 
 export function validateConfig(config: Record<string, unknown>) {
+	console.info("🔍 Validating configuration...")
 	const result = configSchema.safeParse(config)
 	if (!result.success) {
+		console.error("❌ Invalid configuration:")
 		const errors = result.error.errors
 			.map((error) => {
 				const field = error.path.join(".")
-				return `❌ [${field}]: ${error.message}`
+				return `- [${field}]: ${error.message}`
 			})
 			.join("\n")
 
-		console.error(errors)
+		console.info(errors)
 		process.exit(1)
+	} else {
+		console.info("✅ Configuration validated successfully")
 	}
 	return result.data
 }
