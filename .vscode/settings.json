@@ -13,7 +13,13 @@
 		"dist": true,
 		".vscode": true,
 		"yarn.lock": true,
+		"node_modules": true,
+		"prisma/__generated__": true
+	},
+	"hide-files.files": ["dist", ".vscode", "yarn.lock", "node_modules"],
+	"search.exclude": {
+		"prisma/__generated__": true,
 		"node_modules": true
 	},
-	"hide-files.files": ["dist", ".vscode", "yarn.lock", "node_modules"]
+	"typescript.validate.exclude": ["prisma/__generated__/**", "node_modules/**"]
 }
