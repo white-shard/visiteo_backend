@@ -9,7 +9,10 @@ import {
 } from "@nestjs/common"
 import { Request, Response } from "express"
 
+import { TransformResponse } from "@/libs/common/mapper/decorator"
+
 import { AuthService } from "./auth.service"
+import { AuthResponseDto } from "./dto/auth-response.dto"
 import { LoginDto } from "./dto/login.dto"
 import { RegisterDto } from "./dto/register.dto"
 
@@ -19,12 +22,14 @@ export class AuthController {
 
 	@Post("register")
 	@HttpCode(HttpStatus.OK)
+	@TransformResponse(AuthResponseDto)
 	async register(@Req() req: Request, @Body() data: RegisterDto) {
 		return this.authService.register(req, data)
 	}
 
 	@Post("login")
 	@HttpCode(HttpStatus.OK)
+	@TransformResponse(AuthResponseDto)
 	async login(@Req() req: Request, @Body() data: LoginDto) {
 		return this.authService.login(req, data)
 	}

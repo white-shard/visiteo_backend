@@ -1,11 +1,12 @@
 import { ValidationPipe } from "@nestjs/common"
-import { NestFactory } from "@nestjs/core"
+import { NestFactory, Reflector } from "@nestjs/core"
 import { RedisStore } from "connect-redis"
 import * as cookieParser from "cookie-parser"
 import * as session from "express-session"
 import IORedis from "ioredis"
 
 import { AppModule } from "./app.module"
+import { TransformResponseInterceptor } from "./libs/common/mapper/interceptor"
 import { config } from "./libs/config/app.config"
 
 async function bootstrap() {
@@ -18,6 +19,9 @@ async function bootstrap() {
 			transform: true,
 			whitelist: true
 		})
+	)
+	app.useGlobalInterceptors(
+		new TransformResponseInterceptor(app.get(Reflector))
 	)
 
 	app.use(

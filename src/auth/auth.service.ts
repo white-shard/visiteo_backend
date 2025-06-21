@@ -74,11 +74,9 @@ export class AuthService {
 	public async saveSession(req: Request, user: User) {
 		return new Promise((resolve, reject) => {
 			req.session.userId = user.id
-			console.log(req.session)
 
 			req.session.save((err) => {
 				if (err) {
-					console.log(err)
 					reject(
 						new InternalServerErrorException("Ошибка при сохранении сессии")
 					)
