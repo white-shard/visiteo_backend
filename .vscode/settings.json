@@ -10,9 +10,13 @@
 		"**/.expo-shared": true,
 		"**/.idea": true,
 		"**/.nuxt": true,
-		".vscode": true,
-		"node_modules": true,
-		"yarn.lock": true
+		"yarn.lock": true,
+		"dist": true,
+		".vscode": true
 	},
-	"hide-files.files": [".vscode", "node_modules", "yarn.lock"]
+	"hide-files.files": [
+		"yarn.lock",
+		"dist",
+		".vscode"
+	]
 }

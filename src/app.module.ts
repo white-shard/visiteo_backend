@@ -4,6 +4,7 @@ import * as dotenv from "dotenv"
 import * as dotenvExpand from "dotenv-expand"
 
 import { validateConfig } from "./libs/common/validation/config.validator"
+import { PrismaModule } from './prisma/prisma.module';
 
 dotenvExpand.expand(dotenv.config())
 const APPLICATION_ENV = process.env
@@ -15,7 +16,8 @@ const APPLICATION_ENV = process.env
 			isGlobal: true,
 			load: [() => APPLICATION_ENV],
 			validate: validateConfig
-		})
+		}),
+		PrismaModule
 	]
 })
 export class AppModule {}

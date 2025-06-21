@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./__generated__"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URI")
+}
+
+model User {
+  id String @id @default(cuid())
+
+  email    String? @unique
+  password String?
+
+  displayName String  @map("display_name")
+  avatarUrl   String? @map("avatar_url")
+
+  role   UserRole   @default(REGULAR)
+  method AuthMethod
+
+  isVerified         Boolean @default(false) @map("is_verified")
+  isTwoFactorEnabled Boolean @default(false) @map("is_two_factor_enabled")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  accountList Account[]
+  tokenList   Token[]
+
+  @@map("users")
+}
+
+model Account {
+  id String @id @default(cuid())
+
+  type     String
+  provider String
+
+  refreshToken String?   @map("refresh_token")
+  accessToken  String?   @map("access_token")
+  expiresAt    DateTime? @map("expires_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  userId String? @map("user_id")
+  user   User?   @relation(fields: [userId], references: [id])
+
+  @@map("accounts")
+}
+
+model Token {
+  id String @id @default(cuid())
+
+  email     String
+  token     String    @unique
+  type      TokenType
+  expiresAt DateTime  @map("expires_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("tokens")
+}
+
+enum UserRole {
+  ADMIN
+  REGULAR
+}
+
+enum AuthMethod {
+  CREDENTIALS
+  YANDEX
+  GOOGLE
+}
+
+enum TokenType {
+  VERIFICATION
+  TWO_FACTOR
+  PASSWORD_RESET
+}
