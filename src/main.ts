@@ -6,7 +6,6 @@ import * as session from "express-session"
 import IORedis from "ioredis"
 
 import { AppModule } from "./app.module"
-import { StringValue, ms } from "./libs/common/utils/ms.util"
 import { config } from "./libs/config/app.config"
 
 async function bootstrap() {
@@ -16,7 +15,8 @@ async function bootstrap() {
 	app.use(cookieParser(config.COOKIES_SECRET))
 	app.useGlobalPipes(
 		new ValidationPipe({
-			transform: true
+			transform: true,
+			whitelist: true
 		})
 	)
 
@@ -28,7 +28,7 @@ async function bootstrap() {
 			saveUninitialized: false,
 			cookie: {
 				domain: config.SESSION_DOMAIN,
-				maxAge: ms(config.SESSION_MAX_AGE as StringValue),
+				maxAge: config.SESSION_MAX_AGE,
 				httpOnly: config.SESSION_HTTP_ONLY,
 				secure: config.SESSION_SECURE,
 				sameSite: "lax"

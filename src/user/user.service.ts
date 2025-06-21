@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common"
+import { Injectable } from "@nestjs/common"
 import { AuthMethod } from "@prisma/__generated__"
 import { hash } from "argon2"
 
@@ -18,10 +18,6 @@ export class UserService {
 			}
 		})
 
-		if (!user) {
-			throw new NotFoundException("Пользователь не найден")
-		}
-
 		return user
 	}
 	public async findByEmail(
@@ -36,10 +32,6 @@ export class UserService {
 				accountList: includeAccounts
 			}
 		})
-
-		if (!user) {
-			throw new NotFoundException("Пользователь не найден")
-		}
 
 		return user
 	}

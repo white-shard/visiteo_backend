@@ -1,6 +1,8 @@
 import { z } from "zod"
 
 import { TIME_STRING_REGEX } from "../constants/regex.constant"
+import { ms } from "../utils/ms.util"
+import { parseBoolean } from "../utils/parse-boolean.util"
 
 export const configSchema = z.object({
 	NODE_ENV: z.enum(["development", "production"]).default("development"),
@@ -20,9 +22,10 @@ export const configSchema = z.object({
 		.regex(
 			TIME_STRING_REGEX,
 			"Must be a valid time string (e.g., '1 hour', '60s', '500 milliseconds')"
-		),
-	SESSION_HTTP_ONLY: z.coerce.boolean().default(true),
-	SESSION_SECURE: z.coerce.boolean().default(false),
+		)
+		.transform(ms),
+	SESSION_HTTP_ONLY: z.string().transform(parseBoolean).default("true"),
+	SESSION_SECURE: z.string().transform(parseBoolean).default("false"),
 	SESSION_FOLDER: z.string().default("sessions"),
 
 	COOKIES_SECRET: z.string().min(1)
