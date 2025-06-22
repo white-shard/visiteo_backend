@@ -9,10 +9,24 @@ import { UserService } from "@/user/user.service"
 
 import { AuthorizedRequest } from "../types/auth.types"
 
+/**
+ * Guard  для проверки аутентификации пользователя
+ *
+ * Проверяет наличие пользователя в сессии и валидность его данных.
+ * Если пользователь не авторизован или не найден в базе данных,
+ * выбрасывает UnauthorizedException.
+ */
 @Injectable()
 export class AuthGuard implements CanActivate {
 	constructor(private readonly userService: UserService) {}
 
+	/**
+	 * Проверяет возможность получения доступа к маршруту
+	 *
+	 * @param context - Контекст выполнения запроса
+	 * @returns Promise<boolean> - true если пользователь авторизован и найден
+	 * @throws UnauthorizedException - если пользователь не авторизован или не найден
+	 */
 	public async canActivate(context: ExecutionContext): Promise<boolean> {
 		const request = context.switchToHttp().getRequest<AuthorizedRequest>()
 

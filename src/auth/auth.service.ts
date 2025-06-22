@@ -16,6 +16,16 @@ import { LoginDto } from "./dto/login.dto"
 import { RegisterDto } from "./dto/register.dto"
 import { ProviderService } from "./provider/provider.service"
 
+/**
+ * Сервис аутентификации
+ *
+ * Отвечает за:
+ * - Регистрацию новых пользователей
+ * - Вход пользователей с проверкой пароля
+ * - Выход и управление сессиями
+ * - OAuth авторизацию через внешние провайдеры
+ * - Создание и сохранение пользовательских сессий
+ */
 @Injectable()
 export class AuthService {
 	constructor(
@@ -24,6 +34,17 @@ export class AuthService {
 		private readonly providerService: ProviderService
 	) {}
 
+	/**
+	 * Регистрация нового пользователя
+	 *
+	 * Проверяет уникальность email, создает пользователя и сохраняет сессию
+	 *
+	 * @param req - Express request объект для работы с сессией
+	 * @param dto - Данные для регистрации
+	 * @returns Promise с объектом пользователя и сессией
+	 *
+	 * @throws ConflictException если пользователь с таким email уже существует
+	 */
 	public async register(req: Request, dto: RegisterDto) {
 		const isExists = await this.userService.findByEmail(dto.email)
 
@@ -42,6 +63,17 @@ export class AuthService {
 		return this.saveSession(req, newUser)
 	}
 
+	/**
+	 * Вход пользователя в систему
+	 *
+	 * Проверяет email и пароль, создает сессию при успешной авторизации
+	 *
+	 * @param req - Express request объект для работы с сессией
+	 * @param dto - Данные для входа
+	 * @returns Promise с объектом пользователя и сессией
+	 *
+	 * @throws NotFoundException если пользователь не найден или пароль неверный
+	 */
 	public async login(req: Request, dto: LoginDto) {
 		const user = await this.userService.findByEmail(dto.email)
 
@@ -60,6 +92,17 @@ export class AuthService {
 		return this.saveSession(req, user)
 	}
 
+	/**
+	 * Выход пользователя из системы
+	 *
+	 * Уничтожает сессию и очищает cookies
+	 *
+	 * @param req - Express request объект
+	 * @param res - Express response объект
+	 * @returns Promise<void>
+	 *
+	 * @throws InternalServerErrorException если не удалось уничтожить сессию
+	 */
 	public async logout(req: Request, res: Response): Promise<void> {
 		return new Promise((resolve, reject) => {
 			req.session.destroy((err) => {
@@ -76,6 +119,19 @@ export class AuthService {
 		})
 	}
 
+	/**
+	 * Извлечение профиля пользователя из OAuth кода
+	 *
+	 * Получает профиль от провайдера, ищет или создает пользователя,
+	 * связывает аккаунт с провайдером и создает сессию
+	 *
+	 * @param req - Express request объект для работы с сессией
+	 * @param provider - Название OAuth провайдера
+	 * @param code - Код авторизации от провайдера
+	 * @returns Promise с объектом пользователя и сессией
+	 *
+	 * @throws NotFoundException если провайдер не найден
+	 */
 	public async extractProfileFromCode(
 		req: Request,
 		provider: string,
@@ -132,6 +188,17 @@ export class AuthService {
 		return this.saveSession(req, user)
 	}
 
+	/**
+	 * Сохранение пользовательской сессии
+	 *
+	 * Сохраняет ID пользователя в сессии
+	 *
+	 * @param req - Express request объект
+	 * @param user - Объект пользователя
+	 * @returns Promise с объектом пользователя
+	 *
+	 * @throws InternalServerErrorException если не удалось сохранить сессию
+	 */
 	public async saveSession(req: Request, user: User) {
 		return new Promise((resolve, reject) => {
 			req.session.userId = user.id

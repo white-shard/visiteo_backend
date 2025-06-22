@@ -9,6 +9,20 @@ import { AuthController } from "./auth.controller"
 import { AuthService } from "./auth.service"
 import { ProviderModule } from "./provider/provider.module"
 
+/**
+ * Модуль аутентификации
+ *
+ * Предоставляет функциональность для:
+ * - Регистрации и входа пользователей
+ * - OAuth авторизации через различные провайдеры
+ * - Управления сессиями
+ * - Защиты от ботов через Google reCAPTCHA
+ *
+ * Зависимости:
+ * - ProviderModule - для работы с OAuth провайдерами
+ * - GoogleRecaptchaModule - для защиты форм от ботов
+ * - UserService - для работы с пользователями
+ */
 @Module({
 	imports: [
 		ProviderModule.registerAsync({
