@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common"
-import { AuthMethod } from "@prisma/__generated__"
 import { hash } from "argon2"
 
 import { PrismaService } from "@/prisma/prisma.service"
@@ -36,12 +35,11 @@ export class UserService {
 		return user
 	}
 	public async create(
-		email: string,
+		email: string | null,
 		password: string,
 		displayName: string,
 		avatarUrl: string,
-		method: AuthMethod,
-		isVerified: boolean,
+		isEnabled: boolean,
 		includeAccounts: boolean = false
 	) {
 		const user = await this.prisma.user.create({
@@ -50,8 +48,7 @@ export class UserService {
 				password: password ? await hash(password) : "",
 				displayName,
 				avatarUrl,
-				method,
-				isVerified
+				isEnabled
 			},
 			include: {
 				accountList: includeAccounts

@@ -4,19 +4,25 @@ import {
 	InternalServerErrorException,
 	NotFoundException
 } from "@nestjs/common"
-import { AuthMethod, User } from "@prisma/__generated__"
+import { User } from "@prisma/__generated__"
 import { verify } from "argon2"
 import { Request, Response } from "express"
 
 import { config } from "@/libs/config/app.config"
+import { PrismaService } from "@/prisma/prisma.service"
 import { UserService } from "@/user/user.service"
 
 import { LoginDto } from "./dto/login.dto"
 import { RegisterDto } from "./dto/register.dto"
+import { ProviderService } from "./provider/provider.service"
 
 @Injectable()
 export class AuthService {
-	constructor(private readonly userService: UserService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly userService: UserService,
+		private readonly providerService: ProviderService
+	) {}
 
 	public async register(req: Request, dto: RegisterDto) {
 		const isExists = await this.userService.findByEmail(dto.email)
@@ -30,7 +36,6 @@ export class AuthService {
 			dto.password,
 			dto.name,
 			"",
-			AuthMethod.CREDENTIALS,
 			false
 		)
 
@@ -69,6 +74,62 @@ export class AuthService {
 				resolve()
 			})
 		})
+	}
+
+	public async extractProfileFromCode(
+		req: Request,
+		provider: string,
+		code: string
+	) {
+		const instance = this.providerService.findByService(provider)
+
+		if (!instance) {
+			throw new NotFoundException("Не удалось найти провайдер")
+		}
+
+		const profile = await instance.findUserByCode(code)
+
+		const account = await this.prisma.account.findFirst({
+			where: {
+				clientId: profile.id,
+				provider: profile.provider
+			}
+		})
+
+		let user = account?.userId
+			? await this.userService.findById(account.userId)
+			: null
+
+		if (user) {
+			return this.saveSession(req, user)
+		}
+
+		user = await this.userService.findByEmail(profile.email)
+
+		if (!user)
+			user = await this.userService.create(
+				profile.email,
+				"",
+				profile.name,
+				profile.picture,
+				true
+			)
+
+		if (!account) {
+			await this.prisma.account.create({
+				data: {
+					type: "oauth",
+					userId: user.id,
+					clientId: profile.id,
+					provider: profile.provider,
+					accessToken: profile.access_token,
+					refreshToken: profile.refresh_token,
+					expiresAt: profile.expires_at
+				}
+			})
+		}
+
+		return this.saveSession(req, user)
 	}
 
 	public async saveSession(req: Request, user: User) {
