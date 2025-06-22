@@ -7,6 +7,7 @@ import {
 	Req,
 	Res
 } from "@nestjs/common"
+import { Recaptcha } from "@nestlab/google-recaptcha"
 import { Request, Response } from "express"
 
 import { TransformResponse } from "@/libs/common/transform/transform.decorator"
@@ -20,6 +21,7 @@ import { AuthResponseDto } from "./dto/response/auth-response.dto"
 export class AuthController {
 	constructor(private readonly authService: AuthService) {}
 
+	@Recaptcha()
 	@Post("register")
 	@HttpCode(HttpStatus.OK)
 	@TransformResponse(AuthResponseDto)
@@ -27,6 +29,7 @@ export class AuthController {
 		return this.authService.register(req, data)
 	}
 
+	@Recaptcha()
 	@Post("login")
 	@HttpCode(HttpStatus.OK)
 	@TransformResponse(AuthResponseDto)

@@ -28,7 +28,9 @@ export const configSchema = z.object({
 	SESSION_SECURE: z.string().transform(parseBoolean).default("false"),
 	SESSION_FOLDER: z.string().default("sessions"),
 
-	COOKIES_SECRET: z.string().min(1)
+	COOKIES_SECRET: z.string().min(1),
+
+	GOOGLE_RECAPTCHA_SECRET_KEY: z.string().min(1)
 })
 
 export function validateConfig(config: Record<string, unknown>) {
@@ -43,7 +45,7 @@ export function validateConfig(config: Record<string, unknown>) {
 			})
 			.join("\n")
 
-		console.info(errors)
+		console.error(errors)
 		process.exit(1)
 	} else {
 		console.info("✅ Configuration validated successfully")
