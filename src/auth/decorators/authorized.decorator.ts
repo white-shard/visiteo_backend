@@ -3,7 +3,7 @@ import { User } from "@prisma/__generated__"
 
 import { AuthorizedRequest } from "../types/auth.types"
 
-export const Authorized = createParamDecorator(
+export const AuthorizedUser = createParamDecorator(
 	(data: keyof User, context: ExecutionContext) => {
 		const request = context.switchToHttp().getRequest<AuthorizedRequest>()
 		const user = request.user

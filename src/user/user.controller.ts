@@ -1,8 +1,19 @@
-import { Controller } from "@nestjs/common"
+import { Controller, Get, HttpCode, HttpStatus } from "@nestjs/common"
+import { User } from "@prisma/__generated__"
 
-import { UserService } from "./user.service"
+import { AuthorizedRequest } from "@/auth/decorators/auth.decorator"
+import { AuthorizedUser } from "@/auth/decorators/authorized.decorator"
+import { TransformResponse } from "@/libs/common/transform/transform.decorator"
 
-@Controller("user")
+import { UserResponseDto } from "./dto/response/user-response.dto"
+
+@Controller("users")
 export class UserController {
-	constructor(private readonly userService: UserService) {}
+	@Get("current")
+	@AuthorizedRequest()
+	@HttpCode(HttpStatus.OK)
+	@TransformResponse(UserResponseDto)
+	getCurrentUser(@AuthorizedUser() user: User) {
+		return user
+	}
 }
