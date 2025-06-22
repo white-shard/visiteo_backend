@@ -9,12 +9,12 @@ import {
 } from "@nestjs/common"
 import { Request, Response } from "express"
 
-import { TransformResponse } from "@/libs/common/mapper/decorator"
+import { TransformResponse } from "@/libs/common/transform/transform.decorator"
 
 import { AuthService } from "./auth.service"
-import { AuthResponseDto } from "./dto/auth-response.dto"
 import { LoginDto } from "./dto/login.dto"
 import { RegisterDto } from "./dto/register.dto"
+import { AuthResponseDto } from "./dto/response/auth-response.dto"
 
 @Controller("auth")
 export class AuthController {

@@ -6,7 +6,7 @@ import * as session from "express-session"
 import IORedis from "ioredis"
 
 import { AppModule } from "./app.module"
-import { TransformResponseInterceptor } from "./libs/common/mapper/interceptor"
+import { TransformResponseInterceptor } from "./libs/common/transform/transform.interceptor"
 import { config } from "./libs/config/app.config"
 
 async function bootstrap() {
