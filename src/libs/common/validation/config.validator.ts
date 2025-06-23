@@ -1,6 +1,8 @@
 import { z } from "zod"
 
 import { TIME_STRING_REGEX } from "../constants/regex.constant"
+import { ms } from "../utils/ms.util"
+import { parseBoolean } from "../utils/parse-boolean.util"
 
 export const configSchema = z.object({
 	NODE_ENV: z.enum(["development", "production"]).default("development"),
@@ -8,6 +10,7 @@ export const configSchema = z.object({
 	APPLICATION_PORT: z.coerce.number().min(1).max(65535).default(3000),
 	APPLICATION_URL: z.string().url(),
 	ALLOWED_ORIGIN: z.string().url(),
+	USER_PROFILE_URL: z.string().url(),
 
 	POSTGRES_URI: z.string().url(),
 	REDIS_URI: z.string().url(),
@@ -20,12 +23,22 @@ export const configSchema = z.object({
 		.regex(
 			TIME_STRING_REGEX,
 			"Must be a valid time string (e.g., '1 hour', '60s', '500 milliseconds')"
-		),
-	SESSION_HTTP_ONLY: z.coerce.boolean().default(true),
-	SESSION_SECURE: z.coerce.boolean().default(false),
+		)
+		.transform(ms),
+	SESSION_HTTP_ONLY: z.string().transform(parseBoolean).default("true"),
+	SESSION_SECURE: z.string().transform(parseBoolean).default("false"),
 	SESSION_FOLDER: z.string().default("sessions"),
 
-	COOKIES_SECRET: z.string().min(1)
+	COOKIES_SECRET: z.string().min(1),
+
+	GOOGLE_RECAPTCHA_SECRET_KEY: z.string().min(1),
+
+	// OAuth
+	YANDEX_CLIENT_ID: z.string().min(1),
+	YANDEX_CLIENT_SECRET: z.string().min(1),
+
+	GOOGLE_CLIENT_ID: z.string().min(1),
+	GOOGLE_CLIENT_SECRET: z.string().min(1)
 })
 
 export function validateConfig(config: Record<string, unknown>) {
@@ -40,7 +53,7 @@ export function validateConfig(config: Record<string, unknown>) {
 			})
 			.join("\n")
 
-		console.info(errors)
+		console.error(errors)
 		process.exit(1)
 	} else {
 		console.info("✅ Configuration validated successfully")

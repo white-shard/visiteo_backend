@@ -10,10 +10,17 @@
 		"**/.expo-shared": true,
 		"**/.idea": true,
 		"**/.nuxt": true,
+		"prisma/__generated__": true,
 		"dist": true,
 		".vscode": true,
 		"yarn.lock": true,
+		"node_modules": true,
+		".yarn": true
+	},
+	"hide-files.files": ["dist", ".vscode", "yarn.lock", "node_modules", ".yarn"],
+	"search.exclude": {
+		"prisma/__generated__": true,
 		"node_modules": true
 	},
-	"hide-files.files": ["dist", ".vscode", "yarn.lock", "node_modules"]
+	"typescript.validate.exclude": ["prisma/__generated__/**", "node_modules/**"]
 }

@@ -7,7 +7,7 @@
 	"license": "UNLICENSED",
 	"scripts": {
 		"build": "nest build",
-		"format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+		"format": "prettier -w .",
 		"start": "nest start",
 		"start:dev": "nest start --watch",
 		"start:debug": "nest start --debug --watch",
@@ -21,13 +21,15 @@
 	},
 	"dependencies": {
 		"@nestjs/common": "^11.0.1",
-		"@nestjs/config": "^4.0.2",
 		"@nestjs/core": "^11.0.1",
+		"@nestjs/mapped-types": "*",
 		"@nestjs/platform-express": "^11.0.1",
+		"@nestlab/google-recaptcha": "^3.10.0",
 		"@prisma/client": "6.7.0",
+		"argon2": "^0.43.0",
 		"class-transformer": "^0.5.1",
 		"class-validator": "^0.14.2",
-		"connect-redis": "^9.0.0",
+		"connect-redis": "^8.0.1",
 		"cookie-parser": "^1.4.7",
 		"dotenv": "^16.5.0",
 		"dotenv-expand": "^12.0.2",
@@ -84,5 +86,6 @@
 		],
 		"coverageDirectory": "../coverage",
 		"testEnvironment": "node"
-	}
+	},
+	"packageManager": "yarn@4.9.1+sha512.f95ce356460e05be48d66401c1ae64ef84d163dd689964962c6888a9810865e39097a5e9de748876c2e0bf89b232d583c33982773e9903ae7a76257270986538"
 }

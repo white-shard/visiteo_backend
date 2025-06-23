@@ -1,23 +1,11 @@
 import { Module } from "@nestjs/common"
-import { ConfigModule } from "@nestjs/config"
-import * as dotenv from "dotenv"
-import * as dotenvExpand from "dotenv-expand"
 
-import { validateConfig } from "./libs/common/validation/config.validator"
-import { PrismaModule } from './prisma/prisma.module';
-
-dotenvExpand.expand(dotenv.config())
-const APPLICATION_ENV = process.env
+import { AuthModule } from "./auth/auth.module"
+import { ProviderModule } from "./auth/provider/provider.module"
+import { PrismaModule } from "./prisma/prisma.module"
+import { UserModule } from "./user/user.module"
 
 @Module({
-	imports: [
-		ConfigModule.forRoot({
-			ignoreEnvFile: true,
-			isGlobal: true,
-			load: [() => APPLICATION_ENV],
-			validate: validateConfig
-		}),
-		PrismaModule
-	]
+	imports: [PrismaModule, AuthModule, UserModule, ProviderModule]
 })
 export class AppModule {}
