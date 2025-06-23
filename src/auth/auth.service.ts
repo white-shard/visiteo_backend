@@ -162,7 +162,7 @@ export class AuthService {
 
 		user = await this.userService.findByEmail(profile.email)
 
-		if (!user)
+		if (!user) {
 			user = await this.userService.create(
 				profile.email,
 				"",
@@ -170,6 +170,9 @@ export class AuthService {
 				profile.picture,
 				true
 			)
+		} else {
+			// TODO update user isEnabled to true
+		}
 
 		if (!account) {
 			await this.prisma.account.create({

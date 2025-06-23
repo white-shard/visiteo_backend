@@ -10,6 +10,7 @@ export const configSchema = z.object({
 	APPLICATION_PORT: z.coerce.number().min(1).max(65535).default(3000),
 	APPLICATION_URL: z.string().url(),
 	ALLOWED_ORIGIN: z.string().url(),
+	USER_PROFILE_URL: z.string().url(),
 
 	POSTGRES_URI: z.string().url(),
 	REDIS_URI: z.string().url(),

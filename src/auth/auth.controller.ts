@@ -110,7 +110,7 @@ export class AuthController {
 		}
 
 		await this.authService.extractProfileFromCode(req, provider, code)
-		return res.redirect(`${config.ALLOWED_ORIGIN}/dashboard/settings`)
+		return res.redirect(config.USER_PROFILE_URL)
 	}
 
 	/**
