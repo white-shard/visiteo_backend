@@ -33,6 +33,12 @@ export const configSchema = z.object({
 
 	GOOGLE_RECAPTCHA_SECRET_KEY: z.string().min(1),
 
+	// Mail
+	SMTP_HOST: z.string().min(1),
+	SMTP_PORT: z.coerce.number().min(1).max(65535),
+	SMTP_USER: z.string().min(1),
+	SMTP_PASSWORD: z.string().min(1),
+
 	// OAuth
 	YANDEX_CLIENT_ID: z.string().min(1),
 	YANDEX_CLIENT_SECRET: z.string().min(1),
