@@ -12,10 +12,10 @@ import { config } from "src/libs/config/app.config"
 import { PrismaService } from "src/prisma/prisma.service"
 import { UserService } from "src/user/user.service"
 
+import { EmailConfirmationService } from "src/auth/email-confirmation/email-confirmation.service"
 import { LoginDto } from "./dto/login.dto"
 import { RegisterDto } from "./dto/register.dto"
 import { ProviderService } from "./provider/provider.service"
-
 /**
  * Сервис аутентификации
  *
@@ -31,7 +31,8 @@ export class AuthService {
 	constructor(
 		private readonly prisma: PrismaService,
 		private readonly userService: UserService,
-		private readonly providerService: ProviderService
+		private readonly providerService: ProviderService,
+		private readonly emailConfirmationService: EmailConfirmationService
 	) {}
 
 	/**
@@ -60,7 +61,11 @@ export class AuthService {
 			false
 		)
 
-		return this.saveSession(req, newUser)
+		this.emailConfirmationService
+			.sendToken(newUser.id, dto.email)
+			.catch(console.error)
+
+		return { message: "Подтвердите ваш email" }
 	}
 
 	/**

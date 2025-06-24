@@ -14,4 +14,11 @@ export class AuthResponseDto {
 	@Expose()
 	@Type(() => UserResponseDto)
 	user: UserResponseDto
+
+	/**
+	 * Сообщение для пользователя
+	 * @type {string}
+	 */
+	@Expose()
+	message: string
 }

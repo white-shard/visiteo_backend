@@ -6,7 +6,7 @@ import { PrismaService } from "@/prisma/prisma.service"
 import { UserService } from "@/user/user.service"
 import { Injectable, NotFoundException } from "@nestjs/common"
 import { User } from "@prisma/__generated__"
-import cuid from "cuid"
+import * as cuid from "cuid"
 
 const FOLDER = config.TOKENS_FOLDER
 const TOKEN_TYPE = "EMAIL_VERIFICATION"
@@ -55,7 +55,7 @@ export class EmailConfirmationService {
 		const token = await this.generateVerificationToken(userId, email)
 
 		const subject = "Подтверждение электронной почты"
-		const url = `${config.ALLOWED_ORIGIN}/verify/${token}`
+		const url = `${config.ALLOWED_ORIGIN}/verify?token=${token}`
 
 		await this.mailService.sendTemplate(
 			VerificationLinkTemplate({
