@@ -1,6 +1,6 @@
 import { Expose, Type } from "class-transformer"
 
-import { UserResponseDto } from "@/user/dto/response/user-response.dto"
+import { UserResponseDto } from "src/user/dto/response/user-response.dto"
 
 /**
  * DTO для ответа аутентификации

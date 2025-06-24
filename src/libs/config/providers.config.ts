@@ -1,6 +1,6 @@
-import { OptionsType } from "@/auth/provider/provider.constants"
-import { GoogleOAuthProvider } from "@/auth/provider/services/google.provider"
-import { YandexOAuthProvider } from "@/auth/provider/services/yandex.provider"
+import { OptionsType } from "src/auth/provider/provider.constants"
+import { GoogleOAuthProvider } from "src/auth/provider/services/google.provider"
+import { YandexOAuthProvider } from "src/auth/provider/services/yandex.provider"
 
 import { config } from "./app.config"
 

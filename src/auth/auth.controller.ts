@@ -15,8 +15,8 @@ import {
 import { Recaptcha } from "@nestlab/google-recaptcha"
 import { Request, Response } from "express"
 
-import { TransformResponse } from "@/libs/common/transform/transform.decorator"
-import { config } from "@/libs/config/app.config"
+import { TransformResponse } from "src/libs/common/transform/transform.decorator"
+import { config } from "src/libs/config/app.config"
 
 import { AuthService } from "./auth.service"
 import { LoginDto } from "./dto/login.dto"

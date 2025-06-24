@@ -1,12 +1,13 @@
 import { Module } from "@nestjs/common"
 import { GoogleRecaptchaModule } from "@nestlab/google-recaptcha"
 
-import { getProvidersConfig } from "@/libs/config/providers.config"
-import { getRecaptchaConfig } from "@/libs/config/recaptcha.config"
-import { UserService } from "@/user/user.service"
+import { getProvidersConfig } from "src/libs/config/providers.config"
+import { getRecaptchaConfig } from "src/libs/config/recaptcha.config"
+import { UserService } from "src/user/user.service"
 
 import { AuthController } from "./auth.controller"
 import { AuthService } from "./auth.service"
+import { EmailConfirmationModule } from "./email-confirmation/email-confirmation.module"
 import { ProviderModule } from "./provider/provider.module"
 
 /**
@@ -28,7 +29,8 @@ import { ProviderModule } from "./provider/provider.module"
 		ProviderModule.registerAsync({
 			useFactory: getProvidersConfig
 		}),
-		GoogleRecaptchaModule.forRoot(getRecaptchaConfig())
+		GoogleRecaptchaModule.forRoot(getRecaptchaConfig()),
+		EmailConfirmationModule
 	],
 	controllers: [AuthController],
 	providers: [AuthService, UserService]

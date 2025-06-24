@@ -27,9 +27,10 @@ export const configSchema = z.object({
 		.transform(ms),
 	SESSION_HTTP_ONLY: z.string().transform(parseBoolean).default("true"),
 	SESSION_SECURE: z.string().transform(parseBoolean).default("false"),
-	SESSION_FOLDER: z.string().default("sessions"),
+	SESSION_FOLDER: z.string().default("sessions:"),
 
 	COOKIES_SECRET: z.string().min(1),
+	TOKENS_FOLDER: z.string().default("tokens:"),
 
 	GOOGLE_RECAPTCHA_SECRET_KEY: z.string().min(1),
 

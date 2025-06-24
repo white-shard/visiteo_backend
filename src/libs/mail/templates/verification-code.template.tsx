@@ -1,4 +1,4 @@
-import { config } from "@/libs/config/app.config"
+import { config } from "src/libs/config/app.config"
 import {
 	Body,
 	Container,
