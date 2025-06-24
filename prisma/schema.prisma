@@ -56,7 +56,7 @@ model Token {
 
   email     String
   token     String    @unique
-  type      TokenType
+  type      String
   expiresAt DateTime  @map("expires_at")
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -77,10 +77,4 @@ enum AuthMethod {
   CREDENTIALS
   YANDEX
   GOOGLE
-}
-
-enum TokenType {
-  VERIFICATION
-  TWO_FACTOR
-  PASSWORD_RESET
 }
