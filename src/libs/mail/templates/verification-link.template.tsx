@@ -7,7 +7,8 @@ import {
 	Section,
 	Tailwind,
 	Text,
-	Img
+	Img,
+	Button
 } from "@react-email/components"
 import { Html } from "@react-email/html"
 import * as React from "react"
@@ -15,13 +16,18 @@ import * as React from "react"
 interface Props {
 	subject: string
 	message: string
-	code: string
+	url: string
+	/**
+	 * Время, в течение которого ссылка действительна
+	 * @default "1 часа"
+	 * @example "Ссылка действительна в течение ${expiresIn}"
+	 */
 	expiresIn?: string
 }
-export function VerificationCodeTemplate({
+export function VerificationLinkTemplate({
 	subject,
 	message,
-	code,
+	url,
 	expiresIn = "1 часа"
 }: Props): React.JSX.Element {
 	return (
@@ -49,16 +55,17 @@ export function VerificationCodeTemplate({
 
 								<Hr className="border-gray-200" />
 
-								{/* Verification Code */}
+								{/* Verification Button */}
 								<Section className="text-center space-y-4">
 									<Text className="text-sm text-gray-500 font-medium">
-										КОД ПОДТВЕРЖДЕНИЯ
+										ПЕРЕЙДИТЕ ПО ССЫЛКЕ ДЛЯ ПОДТВЕРЖДЕНИЯ
 									</Text>
-									<div className="bg-gray-100 rounded-lg p-6 border-2 border-dashed border-gray-300">
-										<Text className="text-4xl font-mono font-bold text-gray-900 tracking-widest">
-											{code}
-										</Text>
-									</div>
+									<Button
+										href={url}
+										className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors"
+									>
+										Подтвердить
+									</Button>
 								</Section>
 
 								<Hr className="border-gray-200" />
@@ -66,17 +73,18 @@ export function VerificationCodeTemplate({
 								{/* Info */}
 								<Section className="space-y-3 text-center">
 									<Text className="text-sm text-gray-500">
-										Этот код действителен в течение {expiresIn}
+										Ссылка действительна в течение {expiresIn}
 									</Text>
 									<Text className="text-xs text-gray-400">
-										Если вы не запрашивали код, просто проигнорируйте это письмо
+										Если вы не запрашивали подтверждение, просто проигнорируйте
+										это письмо
 									</Text>
 								</Section>
 
 								{/* Warning */}
 								<div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
 									<Text className="text-xs text-blue-700 text-center">
-										<strong>Важно:</strong> Никогда не делитесь этим кодом с
+										<strong>Важно:</strong> Никогда не делитесь этой ссылкой с
 										другими людьми
 									</Text>
 								</div>
