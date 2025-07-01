@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common"
+import { forwardRef, Module } from "@nestjs/common"
 import { GoogleRecaptchaModule } from "@nestlab/google-recaptcha"
 
 import { getProvidersConfig } from "src/libs/config/providers.config"
@@ -30,9 +30,10 @@ import { ProviderModule } from "./provider/provider.module"
 			useFactory: getProvidersConfig
 		}),
 		GoogleRecaptchaModule.forRoot(getRecaptchaConfig()),
-		EmailConfirmationModule
+		forwardRef(() => EmailConfirmationModule)
 	],
 	controllers: [AuthController],
-	providers: [AuthService, UserService]
+	providers: [AuthService, UserService],
+	exports: [AuthService]
 })
 export class AuthModule {}

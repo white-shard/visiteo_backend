@@ -1,4 +1,5 @@
 import {
+	BadRequestException,
 	ConflictException,
 	Injectable,
 	InternalServerErrorException,
@@ -78,6 +79,7 @@ export class AuthService {
 	 * @returns Promise с объектом пользователя и сессией
 	 *
 	 * @throws NotFoundException если пользователь не найден или пароль неверный
+	 * @throws BadRequestException если пользователь не подтвердил email
 	 */
 	public async login(req: Request, dto: LoginDto) {
 		const user = await this.userService.findByEmail(dto.email)
@@ -92,6 +94,16 @@ export class AuthService {
 
 		if (!isPasswordValid) {
 			throw new NotFoundException("Неверный email или пароль")
+		}
+
+		if (!user.isEnabled) {
+			this.emailConfirmationService
+				.sendToken(user.id, user.email!)
+				.catch(console.error)
+
+			throw new BadRequestException(
+				"Подтвердите свой email. На ваш email отправлена ссылка для активации аккаунта"
+			)
 		}
 
 		return this.saveSession(req, user)

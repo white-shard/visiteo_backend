@@ -9,7 +9,7 @@ import { User } from "@prisma/__generated__"
 import * as cuid from "cuid"
 
 const FOLDER = config.TOKENS_FOLDER
-const TOKEN_TYPE = "EMAIL_VERIFICATION"
+const TOKEN_TYPE = "EMAIL"
 const TOKEN_EXPIRATION = 3600
 
 @Injectable()
@@ -22,7 +22,15 @@ export class EmailConfirmationService {
 	) {}
 
 	public async verifyToken(token: string): Promise<User> {
-		const key = `${FOLDER}:*:${TOKEN_TYPE}:${token}`
+		const pattern = `${FOLDER}:*:${TOKEN_TYPE}:${token}`
+		const keys = await this.cacheService.redis.keys(pattern)
+
+		if (keys.length === 0)
+			throw new NotFoundException(
+				"Ссылка недействительна. Запросите новую ссылку для подтверждения"
+			)
+
+		const key = keys[0]
 		const existingToken = await this.cacheService.redis.get(key)
 
 		if (!existingToken)
@@ -44,9 +52,7 @@ export class EmailConfirmationService {
 			data: { email: data.email, isEnabled: true }
 		})
 
-		await this.cacheService.redis.del(
-			`${FOLDER}:${user.id}:${TOKEN_TYPE}:${token}`
-		)
+		await this.cacheService.redis.del(key)
 
 		return user
 	}
@@ -55,7 +61,8 @@ export class EmailConfirmationService {
 		const token = await this.generateVerificationToken(userId, email)
 
 		const subject = "Подтверждение электронной почты"
-		const url = `${config.ALLOWED_ORIGIN}/verify?token=${token}`
+		const url = `${config.ALLOWED_ORIGIN}/verify?type=${TOKEN_TYPE}
+		&token=${token}`
 
 		await this.mailService.sendTemplate(
 			VerificationLinkTemplate({
@@ -71,7 +78,7 @@ export class EmailConfirmationService {
 	async generateVerificationToken(userId: string, email: string) {
 		const token = cuid()
 
-		const key = `${FOLDER}:${userId}:${TOKEN_TYPE}:*`
+		const key = `${FOLDER}:${userId}:${TOKEN_TYPE}:${token}`
 		const existingToken = await this.cacheService.redis.exists(key)
 
 		if (existingToken) await this.cacheService.redis.del(key)
