@@ -12,6 +12,14 @@ const FOLDER = config.TOKENS_FOLDER
 const TOKEN_TYPE = "EMAIL"
 const TOKEN_EXPIRATION = 3600
 
+/**
+ * Сервис для подтверждения электронной почты пользователей
+ *
+ * Предоставляет функциональность для:
+ * - Генерации токенов подтверждения
+ * - Отправки писем с ссылками для подтверждения
+ * - Верификации токенов и активации пользователей
+ */
 @Injectable()
 export class EmailConfirmationService {
 	constructor(
@@ -21,6 +29,13 @@ export class EmailConfirmationService {
 		private readonly mailService: MailService
 	) {}
 
+	/**
+	 * Верифицирует токен подтверждения и активирует пользователя
+	 *
+	 * @param token - Токен подтверждения из ссылки
+	 * @returns Promise<User> - Обновленный пользователь с подтвержденным email
+	 * @throws NotFoundException - Если токен недействителен или пользователь не найден
+	 */
 	public async verifyToken(token: string): Promise<User> {
 		const pattern = `${FOLDER}:*:${TOKEN_TYPE}:${token}`
 		const keys = await this.cacheService.redis.keys(pattern)
@@ -57,6 +72,13 @@ export class EmailConfirmationService {
 		return user
 	}
 
+	/**
+	 * Отправляет письмо с токеном подтверждения на указанный email
+	 *
+	 * @param userId - ID пользователя
+	 * @param email - Email адрес для подтверждения
+	 * @returns Promise<void>
+	 */
 	public async sendToken(userId: string, email: string) {
 		const token = await this.generateVerificationToken(userId, email)
 
@@ -75,6 +97,13 @@ export class EmailConfirmationService {
 		)
 	}
 
+	/**
+	 * Генерирует токен подтверждения и сохраняет его в кэше
+	 *
+	 * @param userId - ID пользователя
+	 * @param email - Email адрес для подтверждения
+	 * @returns Promise<string> - Сгенерированный токен
+	 */
 	async generateVerificationToken(userId: string, email: string) {
 		const token = cuid()
 
