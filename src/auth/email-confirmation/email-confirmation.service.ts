@@ -22,9 +22,13 @@ type TokenData = {
  * Сервис для подтверждения электронной почты пользователей
  *
  * Предоставляет функциональность для:
- * - Генерации токенов подтверждения
- * - Отправки писем с ссылками для подтверждения
+ * - Генерации JWT токенов подтверждения с ограниченным временем жизни
+ * - Отправки писем с ссылками для подтверждения email
  * - Верификации токенов и активации пользователей
+ * - Управления кэшем токенов подтверждения
+ *
+ * Токены хранятся в Redis с временем жизни 1 час (3600 секунд)
+ * и содержат информацию о пользователе и email для подтверждения.
  */
 @Injectable()
 export class EmailConfirmationService {
@@ -39,9 +43,19 @@ export class EmailConfirmationService {
 	/**
 	 * Верифицирует токен подтверждения и активирует пользователя
 	 *
-	 * @param token - Токен подтверждения из ссылки
-	 * @returns Promise<User> - Обновленный пользователь с подтвержденным email
-	 * @throws NotFoundException - Если токен недействителен или пользователь не найден
+	 * Процесс верификации:
+	 * 1. Декодирует JWT токен и извлекает данные пользователя
+	 * 2. Проверяет тип токена (должен быть "EMAIL")
+	 * 3. Проверяет существование токена в кэше Redis
+	 * 4. Находит пользователя по ID
+	 * 5. Обновляет email и активирует пользователя (isEnabled = true)
+	 * 6. Удаляет использованный токен из кэша
+	 *
+	 * @param token - JWT токен подтверждения из ссылки
+	 * @returns Promise<User> - Обновленный пользователь с подтвержденным email и активированным статусом
+	 * @throws NotFoundException - Если токен недействителен, истек, пользователь не найден или токен отсутствует в кэше
+	 * @throws JsonWebTokenError - Если токен имеет неверный формат
+	 * @throws TokenExpiredError - Если токен истек
 	 */
 	public async verifyToken(token: string): Promise<User> {
 		try {
@@ -99,11 +113,17 @@ export class EmailConfirmationService {
 	/**
 	 * Отправляет письмо с токеном подтверждения на указанный email
 	 *
-	 * @param userId - ID пользователя
+	 * Процесс отправки:
+	 * 1. Генерирует новый токен подтверждения
+	 * 2. Формирует URL для подтверждения с токеном
+	 * 3. Отправляет email с использованием шаблона VerificationLinkTemplate
+	 *
+	 * @param userId - Уникальный идентификатор пользователя
 	 * @param email - Email адрес для подтверждения
-	 * @returns Promise<void>
+	 * @returns Promise<void> - Письмо отправлено успешно
+	 * @throws Error - При ошибке генерации токена или отправки письма
 	 */
-	public async sendToken(userId: string, email: string) {
+	public async sendToken(userId: string, email: string): Promise<void> {
 		const token = await this.generateVerificationToken(userId, email)
 
 		const subject = "Подтверждение электронной почты"
@@ -123,11 +143,21 @@ export class EmailConfirmationService {
 	/**
 	 * Генерирует токен подтверждения и сохраняет его в кэше
 	 *
-	 * @param userId - ID пользователя
+	 * Процесс генерации:
+	 * 1. Формирует ключ для кэша в формате: {FOLDER}:{userId}:{TOKEN_TYPE}
+	 * 2. Удаляет существующий токен, если он есть
+	 * 3. Сохраняет данные токена в Redis с временем жизни TOKEN_EXPIRATION
+	 * 4. Генерирует JWT токен с данными пользователя и email
+	 *
+	 * @param userId - Уникальный идентификатор пользователя
 	 * @param email - Email адрес для подтверждения
-	 * @returns Promise<string> - Сгенерированный токен
+	 * @returns Promise<string> - JWT токен подтверждения
+	 * @throws Error - При ошибке работы с кэшем или генерации JWT
 	 */
-	async generateVerificationToken(userId: string, email: string) {
+	async generateVerificationToken(
+		userId: string,
+		email: string
+	): Promise<string> {
 		const key = `${FOLDER}:${userId}:${TOKEN_TYPE}`
 		const existingToken = await this.cacheService.redis.exists(key)
 
