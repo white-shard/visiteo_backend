@@ -7,6 +7,7 @@ import { CacheModule } from "./libs/cache/cache.module"
 import { MailModule } from "./libs/mail/mail.module"
 import { PrismaModule } from "./prisma/prisma.module"
 import { UserModule } from "./user/user.module"
+import { PasswordRecoveryModule } from "./auth/password-recovery/password-recovery.module"
 
 @Module({
 	imports: [
@@ -16,7 +17,8 @@ import { UserModule } from "./user/user.module"
 		ProviderModule,
 		MailModule,
 		EmailConfirmationModule,
-		CacheModule
+		CacheModule,
+		PasswordRecoveryModule
 	]
 })
 export class AppModule {}
