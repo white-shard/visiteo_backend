@@ -9,7 +9,7 @@ import { IsNotEmpty, IsString } from "class-validator"
  * Токен должен быть получен из ссылки, отправленной на email
  * пользователя в процессе регистрации или смены email.
  */
-export class ConfirmationDto {
+export class EmailConfirmationDto {
 	/**
 	 * JWT токен подтверждения email
 	 *

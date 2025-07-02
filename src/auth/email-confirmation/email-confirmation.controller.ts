@@ -10,7 +10,7 @@ import {
 import { Request } from "express"
 import { AuthService } from "../auth.service"
 import { AuthResponseDto } from "../dto/response/auth-response.dto"
-import { ConfirmationDto } from "./dto/confirmation.dto"
+import { EmailConfirmationDto } from "./dto/confirmation.dto"
 import { EmailConfirmationService } from "./email-confirmation.service"
 
 /**
@@ -25,7 +25,7 @@ import { EmailConfirmationService } from "./email-confirmation.service"
  * После успешного подтверждения email пользователь автоматически
  * авторизуется в системе и получает сессию.
  */
-@Controller("verification")
+@Controller("auth/email-confirmation")
 export class EmailConfirmationController {
 	constructor(
 		private readonly emailConfirmationService: EmailConfirmationService,
@@ -55,10 +55,13 @@ export class EmailConfirmationController {
 	 *   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 	 * }
 	 */
-	@Post("email")
+	@Post()
 	@HttpCode(HttpStatus.OK)
 	@TransformResponse(AuthResponseDto)
-	public async verifyEmail(@Req() req: Request, @Body() body: ConfirmationDto) {
+	public async verifyEmail(
+		@Req() req: Request,
+		@Body() body: EmailConfirmationDto
+	) {
 		const user = await this.emailConfirmationService.verifyToken(body.token)
 
 		return this.authService.saveSession(req, user)
