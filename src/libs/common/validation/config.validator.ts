@@ -31,6 +31,7 @@ export const configSchema = z.object({
 
 	COOKIES_SECRET: z.string().min(1),
 	TOKENS_FOLDER: z.string().default("tokens"),
+	VERIFICATION_SECRET: z.string().min(1),
 
 	GOOGLE_RECAPTCHA_SECRET_KEY: z.string().min(1),
 

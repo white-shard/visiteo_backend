@@ -26,7 +26,6 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   accountList Account[]
-  tokenList   Token[]
 
   @@map("users")
 }
@@ -49,23 +48,6 @@ model Account {
   user   User?   @relation(fields: [userId], references: [id])
 
   @@map("accounts")
-}
-
-model Token {
-  id String @id @default(cuid())
-
-  email     String
-  token     String    @unique
-  type      String
-  expiresAt DateTime  @map("expires_at")
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  userId String @map("user_id")
-  user   User   @relation(fields: [userId], references: [id])
-
-  @@map("tokens")
 }
 
 enum UserRole {

@@ -1,3 +1,4 @@
+import { TransformResponse } from "@/libs/common/transform/transform.decorator"
 import {
 	Body,
 	Controller,
@@ -8,6 +9,7 @@ import {
 } from "@nestjs/common"
 import { Request } from "express"
 import { AuthService } from "../auth.service"
+import { AuthResponseDto } from "../dto/response/auth-response.dto"
 import { ConfirmationDto } from "./dto/confirmation.dto"
 import { EmailConfirmationService } from "./email-confirmation.service"
 
@@ -30,6 +32,7 @@ export class EmailConfirmationController {
 	 */
 	@Post("email")
 	@HttpCode(HttpStatus.OK)
+	@TransformResponse(AuthResponseDto)
 	public async verifyEmail(@Req() req: Request, @Body() body: ConfirmationDto) {
 		const user = await this.emailConfirmationService.verifyToken(body.token)
 

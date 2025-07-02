@@ -5,12 +5,18 @@ import { VerificationLinkTemplate } from "@/libs/mail/templates/verification-lin
 import { PrismaService } from "@/prisma/prisma.service"
 import { UserService } from "@/user/user.service"
 import { Injectable, NotFoundException } from "@nestjs/common"
+import { JwtService } from "@nestjs/jwt"
 import { User } from "@prisma/__generated__"
-import * as cuid from "cuid"
 
 const FOLDER = config.TOKENS_FOLDER
 const TOKEN_TYPE = "EMAIL"
 const TOKEN_EXPIRATION = 3600
+
+type TokenData = {
+	userId: string
+	email: string
+	type: string
+}
 
 /**
  * Сервис для подтверждения электронной почты пользователей
@@ -26,7 +32,8 @@ export class EmailConfirmationService {
 		private readonly prisma: PrismaService,
 		private readonly cacheService: CacheService,
 		private readonly userService: UserService,
-		private readonly mailService: MailService
+		private readonly mailService: MailService,
+		private readonly jwtService: JwtService
 	) {}
 
 	/**
@@ -37,39 +44,56 @@ export class EmailConfirmationService {
 	 * @throws NotFoundException - Если токен недействителен или пользователь не найден
 	 */
 	public async verifyToken(token: string): Promise<User> {
-		const pattern = `${FOLDER}:*:${TOKEN_TYPE}:${token}`
-		const keys = await this.cacheService.redis.keys(pattern)
-
-		if (keys.length === 0)
-			throw new NotFoundException(
-				"Ссылка недействительна. Запросите новую ссылку для подтверждения"
+		try {
+			const { userId, type } = await this.jwtService.verifyAsync<TokenData>(
+				token,
+				{
+					ignoreExpiration: true
+				}
 			)
 
-		const key = keys[0]
-		const existingToken = await this.cacheService.redis.get(key)
+			if (type !== TOKEN_TYPE)
+				throw new NotFoundException(
+					"Ссылка недействительна. Запросите новую ссылку для подтверждения"
+				)
 
-		if (!existingToken)
-			throw new NotFoundException(
-				"Ссылка недействительна. Запросите новую ссылку для подтверждения"
-			)
+			const key = `${FOLDER}:${userId}:${TOKEN_TYPE}`
+			const existingToken = await this.cacheService.redis.get(key)
 
-		const data = JSON.parse(existingToken) as { userId: string; email: string }
+			if (!existingToken)
+				throw new NotFoundException(
+					"Ссылка недействительна. Запросите новую ссылку для подтверждения"
+				)
 
-		const user = await this.userService.findById(data.userId)
+			const data = JSON.parse(existingToken) as { email: string }
 
-		if (!user)
-			throw new NotFoundException(
-				"Пользователь не найден. Запросите новую ссылку для подтверждения"
-			)
+			const user = await this.userService.findById(userId)
 
-		await this.prisma.user.update({
-			where: { id: user.id },
-			data: { email: data.email, isEnabled: true }
-		})
+			if (!user)
+				throw new NotFoundException(
+					"Пользователь не найден. Запросите новую ссылку для подтверждения"
+				)
 
-		await this.cacheService.redis.del(key)
+			await this.prisma.user.update({
+				where: { id: user.id },
+				data: { email: data.email, isEnabled: true }
+			})
 
-		return user
+			await this.cacheService.redis.del(key)
+
+			return user
+		} catch (error) {
+			if (
+				error instanceof Error &&
+				(error.name === "JsonWebTokenError" ||
+					error.name === "TokenExpiredError")
+			) {
+				throw new NotFoundException(
+					"Ссылка недействительна. Запросите новую ссылку для подтверждения"
+				)
+			}
+			throw error
+		}
 	}
 
 	/**
@@ -83,8 +107,7 @@ export class EmailConfirmationService {
 		const token = await this.generateVerificationToken(userId, email)
 
 		const subject = "Подтверждение электронной почты"
-		const url = `${config.ALLOWED_ORIGIN}/verify?type=${TOKEN_TYPE}
-		&token=${token}`
+		const url = `${config.ALLOWED_ORIGIN}/verify?type=${TOKEN_TYPE}&token=${token}`
 
 		await this.mailService.sendTemplate(
 			VerificationLinkTemplate({
@@ -105,20 +128,22 @@ export class EmailConfirmationService {
 	 * @returns Promise<string> - Сгенерированный токен
 	 */
 	async generateVerificationToken(userId: string, email: string) {
-		const token = cuid()
-
-		const key = `${FOLDER}:${userId}:${TOKEN_TYPE}:${token}`
+		const key = `${FOLDER}:${userId}:${TOKEN_TYPE}`
 		const existingToken = await this.cacheService.redis.exists(key)
 
 		if (existingToken) await this.cacheService.redis.del(key)
 
 		await this.cacheService.redis.set(
 			key,
-			JSON.stringify({ userId, email }),
+			JSON.stringify({ email }),
 			"EX",
 			TOKEN_EXPIRATION
 		)
 
-		return token
+		return this.jwtService.signAsync({
+			userId,
+			email,
+			type: TOKEN_TYPE
+		})
 	}
 }
