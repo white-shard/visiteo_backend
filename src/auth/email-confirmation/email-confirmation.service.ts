@@ -124,7 +124,7 @@ export class EmailConfirmationService {
 	 * @throws Error - При ошибке генерации токена или отправки письма
 	 */
 	public async sendToken(userId: string, email: string): Promise<void> {
-		const token = await this.generateVerificationToken(userId, email)
+		const token = await this.generateToken(userId, email)
 
 		const subject = "Подтверждение электронной почты"
 		const url = `${config.ALLOWED_ORIGIN}/verify?type=${TOKEN_TYPE}&token=${token}`
@@ -154,10 +154,7 @@ export class EmailConfirmationService {
 	 * @returns Promise<string> - JWT токен подтверждения
 	 * @throws Error - При ошибке работы с кэшем или генерации JWT
 	 */
-	async generateVerificationToken(
-		userId: string,
-		email: string
-	): Promise<string> {
+	async generateToken(userId: string, email: string): Promise<string> {
 		const key = `${FOLDER}:${userId}:${TOKEN_TYPE}`
 		const existingToken = await this.cacheService.redis.exists(key)
 
