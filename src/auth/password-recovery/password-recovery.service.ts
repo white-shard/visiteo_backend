@@ -18,6 +18,17 @@ type TokenData = {
 	type: string
 }
 
+/**
+ * Сервис для восстановления пароля пользователей
+ *
+ * Предоставляет функциональность для:
+ * - Генерации JWT токенов для сброса пароля
+ * - Отправки email с ссылкой для сброса пароля
+ * - Изменения пароля пользователя с валидацией токена
+ *
+ * Токены хранятся в Redis с временем жизни 1 час (3600 секунд).
+ * После успешного сброса пароля токен удаляется из кэша.
+ */
 @Injectable()
 export class PasswordRecoveryService {
 	constructor(
@@ -28,6 +39,26 @@ export class PasswordRecoveryService {
 		private readonly prisma: PrismaService
 	) {}
 
+	/**
+	 * Изменяет пароль пользователя с использованием токена
+	 *
+	 * Валидирует JWT токен, проверяет его наличие в Redis,
+	 * находит пользователя и обновляет его пароль в базе данных.
+	 * После успешного изменения пароля токен удаляется из кэша.
+	 *
+	 * @param token - JWT токен для сброса пароля
+	 * @param password - Новый пароль (будет захеширован с помощью Argon2)
+	 *
+	 * @returns Promise<User> - Обновленные данные пользователя
+	 *
+	 * @throws {NotFoundException} - Если токен недействителен, истек, отсутствует в кэше или пользователь не найден
+	 *
+	 * @example
+	 * const user = await passwordRecoveryService.changePassword(
+	 *   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+	 *   "newSecurePassword123"
+	 * );
+	 */
 	public async changePassword(token: string, password: string): Promise<User> {
 		try {
 			const { userId, type } = await this.jwtService.verifyAsync<TokenData>(
@@ -79,6 +110,23 @@ export class PasswordRecoveryService {
 		}
 	}
 
+	/**
+	 * Отправляет email с ссылкой для сброса пароля
+	 *
+	 * Генерирует JWT токен, сохраняет его в Redis и отправляет
+	 * email с ссылкой, содержащей токен для сброса пароля.
+	 *
+	 * @param userId - ID пользователя
+	 * @param email - Email адрес для отправки письма
+	 *
+	 * @returns Promise<void> - Успешная отправка email
+	 *
+	 * @example
+	 * await passwordRecoveryService.sendToken(
+	 *   "user-id-123",
+	 *   "user@example.com"
+	 * );
+	 */
 	public async sendToken(userId: string, email: string): Promise<void> {
 		const token = await this.generateToken(userId)
 
@@ -96,6 +144,21 @@ export class PasswordRecoveryService {
 		)
 	}
 
+	/**
+	 * Генерирует JWT токен для сброса пароля
+	 *
+	 * Создает новый JWT токен с типом PASSWORD_RECOVERY и сохраняет
+	 * информацию о нем в Redis с временем жизни 1 час.
+	 * Если токен уже существует для пользователя, он удаляется перед созданием нового.
+	 *
+	 * @param userId - ID пользователя
+	 *
+	 * @returns Promise<string> - JWT токен для сброса пароля
+	 *
+	 * @example
+	 * const token = await passwordRecoveryService.generateToken("user-id-123");
+	 * // Возвращает: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+	 */
 	async generateToken(userId: string): Promise<string> {
 		const key = `${FOLDER}:${userId}:${TOKEN_TYPE}`
 		const existingToken = await this.cacheService.redis.exists(key)

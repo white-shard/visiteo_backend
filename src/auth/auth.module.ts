@@ -9,6 +9,7 @@ import { AuthController } from "./auth.controller"
 import { AuthService } from "./auth.service"
 import { EmailConfirmationModule } from "./email-confirmation/email-confirmation.module"
 import { ProviderModule } from "./provider/provider.module"
+import { PasswordRecoveryModule } from "./password-recovery/password-recovery.module"
 
 /**
  * Модуль аутентификации
@@ -23,6 +24,8 @@ import { ProviderModule } from "./provider/provider.module"
  * - ProviderModule - для работы с OAuth провайдерами
  * - GoogleRecaptchaModule - для защиты форм от ботов
  * - UserService - для работы с пользователями
+ * - EmailConfirmationModule - для подтверждения email
+ * - PasswordRecoveryModule - для восстановления пароля
  */
 @Module({
 	imports: [
@@ -30,7 +33,8 @@ import { ProviderModule } from "./provider/provider.module"
 			useFactory: getProvidersConfig
 		}),
 		GoogleRecaptchaModule.forRoot(getRecaptchaConfig()),
-		forwardRef(() => EmailConfirmationModule)
+		forwardRef(() => EmailConfirmationModule),
+		PasswordRecoveryModule
 	],
 	controllers: [AuthController],
 	providers: [AuthService, UserService],
